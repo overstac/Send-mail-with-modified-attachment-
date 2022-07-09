@@ -1,18 +1,26 @@
 import yagmail
 import os
-import time
-from datetime import datetime as dt
+import pandas
+
 
 sender= "pintilei92@gmail.com"
-receiver= "	andreea.nanmarinescu@yahoo.com"
-subject= "This is a great subject :D"
+subject= "This is the subject!"
 
-contents= "Not such a good content!"
-while True: 
-  now= dt.now()
-  if now.hour == 19 and now.minute == 40:     # TIME Z
-    yag= yagmail.SMTP(user= sender, password=os.environ['PASS'])
-    yag.send(to= receiver, subject= subject, contents= contents)
-    print("Email sent!")
-    time.sleep(60)
-    
+df = pandas.read_csv("contacts.csv")
+
+yag= yagmail.SMTP(user= sender, password=os.environ['PASS'])
+
+def generate_file(filename, content):
+  with open (filename, "w") as file:
+    file.write(str(content))
+  
+
+for index, row in df.iterrows():
+  receiver_mail= row["email"]
+  name= row["name"]
+  filename= name + ".txt"
+  amount= row["amount"]
+  generate_file(filename, amount)
+  contents= [f"Hey, {name} you have to pay {amount} dolars! Bill is attached!", filename]
+  yag.send(to= receiver_mail, subject= subject, contents= contents)
+  print("Email sent!")    
